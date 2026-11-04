@@ -1,6 +1,8 @@
+
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
+import { Eye, EyeOff } from 'lucide-react'
 
 const API = 'http://localhost:5000/api'
 
@@ -13,10 +15,11 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // One small function that sends data to the backend
+  // Send data to backend
   async function sendToServer(path, body) {
     setError('')
     setLoading(true)
+
     try {
       const res = await fetch(API + path, {
         method: 'POST',
@@ -24,8 +27,11 @@ export default function Login() {
         credentials: 'include',
         body: JSON.stringify(body),
       })
+
       const data = await res.json()
+
       if (!res.ok) throw new Error(data.message || 'Login failed.')
+
       navigate('/levels')
     } catch (err) {
       setError(
@@ -41,16 +47,19 @@ export default function Login() {
   // Email and password login
   function handleSubmit(e) {
     e.preventDefault()
+
     if (!email || !password) {
       return setError('Please enter your email and password.')
     }
+
     if (!/\S+@\S+\.\S+/.test(email)) {
       return setError('Please enter a valid email address.')
     }
+
     sendToServer('/login', { email, password, remember })
   }
 
-  // Google login: Google gives us a token, the server checks it
+  // Google login
   function handleGoogleSuccess(response) {
     sendToServer('/google-login', { credential: response.credential })
   }
@@ -67,22 +76,33 @@ export default function Login() {
         onSubmit={handleSubmit}
         className="w-full max-w-sm rounded-lg border border-yellow-400 bg-black/80 p-6 text-white"
       >
-        <h1 className="text-center text-3xl font-bold text-yellow-400">Fruit Catch</h1>
+        <h1 className="text-center text-3xl font-bold text-yellow-400">
+          Fruit Catch
+        </h1>
+
         <p className="mt-1 mb-5 text-center text-sm">
           Welcome back! Log in to continue playing Fruit Catch.
         </p>
 
-        <label htmlFor="email" className="mb-1 block text-sm">Email</label>
+        {/* Email */}
+        <label htmlFor="email" className="mb-1 block text-md">
+          Email
+        </label>
+
         <input
           id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@gmail.com"
-          className="mb-3 w-full rounded-md border border-white bg-transparent px-3 py-2 text-sm text-white placeholder-gray-300"
+          className="mb-3 w-full rounded-lg border border-white/80 bg-white/5 px-4 py-2 text-white text-sm placeholder-gray-300 outline-none focus:border-yellow-400"
         />
 
-        <label htmlFor="password" className="mb-1 block text-sm">Password</label>
+        {/* Password */}
+        <label htmlFor="password" className="mb-1 block text-md">
+          Password
+        </label>
+
         <div className="relative mb-3">
           <input
             id="password"
@@ -90,17 +110,21 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
-            className="w-full rounded-md border border-white bg-transparent px-3 py-2 pr-14 text-sm text-white placeholder-gray-300"
+            className="w-full rounded-lg border border-white/80 bg-white/5 px-4 py-2 pr-10 text-white text-sm placeholder-gray-300 outline-none focus:border-yellow-400"
           />
+
+          {/* Show / Hide Password */}
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white transition-colors"
           >
-            {showPassword ? 'Hide' : 'Show'}
+            {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
           </button>
         </div>
 
+        {/* Remember me and Forgot Password */}
         <div className="mb-4 flex items-center justify-between text-xs">
           <label className="flex items-center gap-2">
             <input
@@ -110,13 +134,20 @@ export default function Login() {
             />
             Remember me
           </label>
-          <Link to="/forgot-password" className="underline">Forgot Password</Link>
+
+          <Link to="/forgot-password" className="underline">
+            Forgot Password
+          </Link>
         </div>
 
+        {/* Error message */}
         {error && (
-          <p role="alert" className="mb-3 text-center text-sm text-red-300">{error}</p>
+          <p role="alert" className="mb-3 text-center text-sm text-red-300">
+            {error}
+          </p>
         )}
 
+        {/* Login button */}
         <button
           type="submit"
           disabled={loading}
@@ -125,6 +156,7 @@ export default function Login() {
           {loading ? 'Please wait...' : 'Login'}
         </button>
 
+        {/* Divider */}
         <div className="my-5 flex items-center gap-5">
           <div className="h-px flex-1 bg-white/30"></div>
           <span className="text-xs text-gray-300">or</span>
