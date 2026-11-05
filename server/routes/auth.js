@@ -2,6 +2,9 @@ import express from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import db from '../db.js'
+import { OAuth2Client } from 'google-auth-library'
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
 const router = express.Router()
 
@@ -91,6 +94,45 @@ router.get('/me', (req, res) => {
     res.json({ id: user.id, name: user.name })
   } catch {
     res.status(401).json({ message: 'Not logged in.' })
+  }
+})
+
+// GOOGLE LOGIN (also used for Google sign up)
+router.post('/google-login', async (req, res) => {
+  try {
+    const { credential } = req.body
+    if (!credential) {
+      return res.status(400).json({ message: 'Google token is missing.' })
+    }
+
+    
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    })
+    const { email, name, email_verified } = ticket.getPayload()
+
+    if (!email_verified) {
+      return res.status(401).json({ message: 'Your Google email is not verified.' })
+    }
+
+    
+    const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email])
+    let user = rows[0]
+
+    if (!user) {
+      const [result] = await db.query(
+        'INSERT INTO users (name, email) VALUES (?, ?)',
+        [name, email]
+      )
+      user = { id: result.insertId, name }
+    }
+
+    setLoginCookie(res, user, true)
+    res.json({ message: 'Logged in with Google.' })
+  } catch (err) {
+    console.error(err)
+    res.status(401).json({ message: 'Google login failed. Please try again.' })
   }
 })
 
