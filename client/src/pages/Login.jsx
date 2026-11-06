@@ -44,7 +44,7 @@ export default function Login() {
     }
   }
 
-  // Email and password login
+ 
   function handleSubmit(e) {
     e.preventDefault()
 
@@ -59,7 +59,7 @@ export default function Login() {
     sendToServer('/login', { email, password, remember })
   }
 
-  // Google login
+  
   function handleGoogleSuccess(response) {
     sendToServer('/google-login', { credential: response.credential })
   }
