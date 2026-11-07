@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 export default function Welcome() {
   const navigate = useNavigate()
 
-  // Guest: remember this in the browser, then go to the game
+ 
   function playAsGuest() {
     sessionStorage.setItem('player', 'guest')
     navigate('/ready-to-play')
