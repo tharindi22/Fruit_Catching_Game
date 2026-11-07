@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Pause from './Pause'
 
 // Level 1 settings (we will move these to levels.js in the levels branch)
 const level = { time: 30, fallSpeed: 3, bombChance: 0.2, spawnEvery: 800 }
@@ -16,9 +17,17 @@ const FRUITS = [
 export default function Game() {
   const navigate = useNavigate()
   const canvasRef = useRef(null)
+  const pausedRef = useRef(false) // the game loop reads this
+  const [paused, setPaused] = useState(false) // the screen reads this
   const [score, setScore] = useState(0)
   const [timeLeft, setTimeLeft] = useState(level.time)
   const bonusLeft = 2 // Banana puzzle bonuses (we add the puzzle later)
+
+  // Pause or resume
+  function togglePause() {
+    pausedRef.current = !pausedRef.current
+    setPaused(pausedRef.current)
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -45,11 +54,12 @@ export default function Game() {
       basket.x = (e.clientX - rect.left) * (canvas.width / rect.width)
     }
 
-    // EVENTS: arrow keys pressed and released
+    // EVENTS: arrow keys pressed and released, Escape or P pauses
     function handleKeyDown(e) {
       if (e.key === 'ArrowLeft') keys.left = true
       if (e.key === 'ArrowRight') keys.right = true
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') e.preventDefault()
+      if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') togglePause()
     }
     function handleKeyUp(e) {
       if (e.key === 'ArrowLeft') keys.left = false
@@ -59,6 +69,12 @@ export default function Game() {
     // The game loop: runs about 60 times every second
     function loop(now) {
       if (over) return
+
+      // While paused, do nothing but keep the loop alive
+      if (pausedRef.current) {
+        frameId = requestAnimationFrame(loop)
+        return
+      }
 
       // 1. Move the basket (arrow keys) and keep it inside the screen
       if (keys.left) basket.x -= basket.speed
@@ -108,8 +124,9 @@ export default function Game() {
       frameId = requestAnimationFrame(loop)
     }
 
-    // EVENT: the timer ticks every second
+    // EVENT: the timer ticks every second (it waits while paused)
     const timer = setInterval(() => {
+      if (pausedRef.current) return
       time -= 1
       setTimeLeft(time)
       if (time <= 0) endGame('time') // later: the Banana puzzle appears here
@@ -142,6 +159,9 @@ export default function Game() {
           <span className={pill}>Score {score}</span>
           <span className={pill}>{timeLeft}s</span>
           <span className={pill}>Bonus {bonusLeft}</span>
+          <button onClick={togglePause} className={pill + ' hover:bg-yellow-400/10'}>
+            Pause
+          </button>
         </div>
 
         {/* Game area */}
@@ -153,9 +173,11 @@ export default function Game() {
         />
 
         <p className="mt-2 text-center text-xs text-gray-300">
-          Move with the mouse or the left and right arrow keys
+          Move with the mouse or the left and right arrow keys. Press Esc to pause.
         </p>
       </div>
+
+      {paused && <Pause onResume={togglePause} />}
     </div>
   )
 }

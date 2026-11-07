@@ -6,7 +6,7 @@ const API = 'http://localhost:5000/api'
 export default function ReadyToPlay() {
   const navigate = useNavigate()
   const [name, setName] = useState('')
-  const bestScore = 0 
+  const bestScore = Number(localStorage.getItem('bestScore')) || 0 
 
   
   useEffect(() => {
