@@ -8,7 +8,7 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
 const router = express.Router()
 
-// Create a token and save it in an httpOnly cookie
+
 function setLoginCookie(res, user, remember) {
   const days = remember ? 7 : 1
   const token = jwt.sign(
@@ -23,7 +23,7 @@ function setLoginCookie(res, user, remember) {
   })
 }
 
-// REGISTER
+
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body
@@ -53,7 +53,7 @@ router.post('/register', async (req, res) => {
   }
 })
 
-// LOGIN
+
 router.post('/login', async (req, res) => {
   try {
     const { email, password, remember } = req.body
@@ -64,7 +64,7 @@ router.post('/login', async (req, res) => {
     const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email])
     const user = rows[0]
 
-    // Same message for both cases, so nobody can guess which emails exist
+    
     if (!user || !user.password_hash) {
       return res.status(401).json({ message: 'Wrong email or password.' })
     }
@@ -81,13 +81,13 @@ router.post('/login', async (req, res) => {
   }
 })
 
-// LOGOUT
+
 router.post('/logout', (req, res) => {
   res.clearCookie('token')
   res.json({ message: 'Logged out.' })
 })
 
-// WHO AM I (checks the cookie)
+
 router.get('/me', (req, res) => {
   try {
     const user = jwt.verify(req.cookies.token, process.env.JWT_SECRET)
@@ -97,7 +97,7 @@ router.get('/me', (req, res) => {
   }
 })
 
-// GOOGLE LOGIN (also used for Google sign up)
+
 router.post('/google-login', async (req, res) => {
   try {
     const { credential } = req.body

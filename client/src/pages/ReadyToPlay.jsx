@@ -69,7 +69,7 @@ export default function ReadyToPlay() {
         </p>
 
         <Link
-          to="/game"
+          to={name === 'Guest' ? '/game/1' : '/levels'}
           className="mb-3 block w-full rounded-lg bg-yellow-400 py-2 text-lg font-semibold text-black hover:bg-yellow-300"
         >
           Play Game

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-// Shown on top of the game. It is not a separate route, so the game keeps its score and time.
+
 export default function Pause({ onResume }) {
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/60 px-4">
