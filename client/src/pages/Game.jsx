@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import Pause from './Pause'
+import { LEVELS, getUnlocked, unlockLevel } from '../levels'
 
-// Level 1 settings (we will move these to levels.js in the levels branch)
-const level = { time: 30, fallSpeed: 3, bombChance: 0.2, spawnEvery: 800 }
 
-// Fruits and the points each one gives
 const FRUITS = [
   { emoji: '🍌', points: 3 },
   { emoji: '🍎', points: 2 },
@@ -14,16 +12,31 @@ const FRUITS = [
   { emoji: '🍊', points: 1 },
 ]
 
+
 export default function Game() {
+  const { level } = useParams()
+  const levelNumber = Number(level)
+  const isGuest = sessionStorage.getItem('player') === 'guest'
+
+  if (!LEVELS[levelNumber - 1]) return <Navigate to="/ready-to-play" replace />
+  if (isGuest && levelNumber > 2) return <Navigate to="/guest-limit" replace />
+  if (!isGuest && levelNumber > getUnlocked()) return <Navigate to="/levels" replace />
+
+  
+  return <GameScreen key={levelNumber} levelNumber={levelNumber} isGuest={isGuest} />
+}
+
+function GameScreen({ levelNumber, isGuest }) {
   const navigate = useNavigate()
+  const level = LEVELS[levelNumber - 1]
   const canvasRef = useRef(null)
-  const pausedRef = useRef(false) // the game loop reads this
-  const [paused, setPaused] = useState(false) // the screen reads this
+  const pausedRef = useRef(false) 
+  const [paused, setPaused] = useState(false) 
   const [score, setScore] = useState(0)
   const [timeLeft, setTimeLeft] = useState(level.time)
-  const bonusLeft = 2 // Banana puzzle bonuses (we add the puzzle later)
+  const bonusLeft = 2 
 
-  // Pause or resume
+  
   function togglePause() {
     pausedRef.current = !pausedRef.current
     setPaused(pausedRef.current)
@@ -35,7 +48,7 @@ export default function Game() {
 
     const basket = { x: canvas.width / 2, y: canvas.height - 50, speed: 8 }
     const keys = { left: false, right: false }
-    let items = [] // falling fruits and bombs
+    let items = [] 
     let total = 0
     let time = level.time
     let lastSpawn = 0
@@ -45,16 +58,30 @@ export default function Game() {
     function endGame(reason) {
       if (over) return
       over = true
-      navigate('/game-over', { state: { score: total, reason } })
+      navigate('/game-over', { state: { score: total, reason, level: levelNumber } })
     }
 
-    // EVENT: mouse moves, so the basket follows the pointer
+    
+    function finishLevel() {
+      if (over) return
+      over = true
+      if (!isGuest) unlockLevel(levelNumber + 1)
+      
+      if (isGuest && levelNumber >= 2) return navigate('/guest-limit')
+
+      const stars = time >= level.time / 2 ? 3 : time >= level.time / 4 ? 2 : 1
+      navigate('/level-complete', {
+        state: { level: levelNumber, score: total, bonus: bonusLeft, timeLeft: time, stars },
+      })
+    }
+
+    
     function handleMouseMove(e) {
       const rect = canvas.getBoundingClientRect()
       basket.x = (e.clientX - rect.left) * (canvas.width / rect.width)
     }
 
-    // EVENTS: arrow keys pressed and released, Escape or P pauses
+    
     function handleKeyDown(e) {
       if (e.key === 'ArrowLeft') keys.left = true
       if (e.key === 'ArrowRight') keys.right = true
@@ -66,22 +93,22 @@ export default function Game() {
       if (e.key === 'ArrowRight') keys.right = false
     }
 
-    // The game loop: runs about 60 times every second
+    
     function loop(now) {
       if (over) return
 
-      // While paused, do nothing but keep the loop alive
+      
       if (pausedRef.current) {
         frameId = requestAnimationFrame(loop)
         return
       }
 
-      // 1. Move the basket (arrow keys) and keep it inside the screen
+      
       if (keys.left) basket.x -= basket.speed
       if (keys.right) basket.x += basket.speed
       basket.x = Math.max(40, Math.min(canvas.width - 40, basket.x))
 
-      // 2. Add a new fruit or bomb every so often
+      
       if (now - lastSpawn > level.spawnEvery) {
         lastSpawn = now
         const fruit = FRUITS[Math.floor(Math.random() * FRUITS.length)]
@@ -96,7 +123,7 @@ export default function Game() {
         })
       }
 
-      // 3. Move everything down and check if the basket caught it
+      
       for (const item of items) {
         item.y += item.speed
         const caught =
@@ -104,15 +131,16 @@ export default function Game() {
           item.y < basket.y + 30 &&
           Math.abs(item.x - basket.x) < 45
         if (caught) {
-          if (item.isBomb) return endGame('bomb') // EVENT: bomb caught
+          if (item.isBomb) return endGame('bomb') 
           total += item.points // EVENT: fruit caught
           setScore(total)
           item.caught = true
+          if (total >= level.target) return finishLevel() 
         }
       }
       items = items.filter((i) => !i.caught && i.y < canvas.height + 30)
 
-      // 4. Draw everything
+      
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
@@ -124,12 +152,12 @@ export default function Game() {
       frameId = requestAnimationFrame(loop)
     }
 
-    // EVENT: the timer ticks every second (it waits while paused)
+    
     const timer = setInterval(() => {
       if (pausedRef.current) return
       time -= 1
       setTimeLeft(time)
-      if (time <= 0) endGame('time') // later: the Banana puzzle appears here
+      if (time <= 0) endGame('time') 
     }, 1000)
 
     canvas.addEventListener('mousemove', handleMouseMove)
@@ -137,7 +165,7 @@ export default function Game() {
     window.addEventListener('keyup', handleKeyUp)
     frameId = requestAnimationFrame(loop)
 
-    // Clean up when the page closes
+    
     return () => {
       over = true
       cancelAnimationFrame(frameId)
@@ -146,17 +174,20 @@ export default function Game() {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [navigate])
+  }, [navigate, level, levelNumber, isGuest])
 
   const pill =
-    'rounded-full border border-yellow-400 px-5 py-1 text-sm text-yellow-400'
+    'rounded-full border border-yellow-400 px-4 py-1 text-sm text-yellow-400'
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-green-900 bg-[url('/bg.jpg')] bg-cover bg-center px-4 py-4">
       <div className="w-full max-w-3xl rounded-xl border border-yellow-400 bg-black/80 p-4 shadow-2xl">
         {/* Top bar */}
-        <div className="mb-3 flex items-center justify-between">
-          <span className={pill}>Score {score}</span>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <span className={pill}>Level {levelNumber}</span>
+          <span className={pill}>
+            Score {score}/{level.target}
+          </span>
           <span className={pill}>{timeLeft}s</span>
           <span className={pill}>Bonus {bonusLeft}</span>
           <button onClick={togglePause} className={pill + ' hover:bg-yellow-400/10'}>

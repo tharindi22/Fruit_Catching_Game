@@ -47,6 +47,7 @@ export default function CreateAccount() {
       const data = await res.json()
 
       if (!res.ok) throw new Error(data.message || 'Could not create account.')
+        sessionStorage.removeItem('player')
 
       navigate('/levels')
     } catch (err) {

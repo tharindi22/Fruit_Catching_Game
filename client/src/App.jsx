@@ -1,11 +1,13 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Welcome from './pages/Welcome'
 import Login from './pages/Login'
 import CreateAccount from './pages/CreateAccount'
 import GuestLimit from './pages/GuestLimit'
 import ReadyToPlay from './pages/ReadyToPlay'
 import HowToPlay from './pages/HowToPlay'
+import LevelSelect from './pages/LevelSelect'
 import Game from './pages/Game'
+import LevelComplete from './pages/LevelComplete'
 import GameOver from './pages/GameOver'
 
 export default function App() {
@@ -18,17 +20,10 @@ export default function App() {
         <Route path="/guest-limit" element={<GuestLimit />} />
         <Route path="/ready-to-play" element={<ReadyToPlay />} />
         <Route path="/how-to-play" element={<HowToPlay />} />
-        <Route path="/game" element={<Game />} />
+        <Route path="/levels" element={<LevelSelect />} />
+        <Route path="/game/:level" element={<Game />} />
+        <Route path="/level-complete" element={<LevelComplete />} />
         <Route path="/game-over" element={<GameOver />} />
-        {/* Placeholders, we will replace these one by one */}
-        <Route
-          path="/levels"
-          element={
-            <Link to="/ready-to-play" className="block p-10 text-white underline">
-              Level Select (coming later). Click here to continue.
-            </Link>
-          }
-        />
         <Route path="/leaderboard" element={<p className="p-10 text-white">Leaderboard page</p>} />
       </Routes>
     </BrowserRouter>
