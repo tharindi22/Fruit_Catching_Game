@@ -6,7 +6,7 @@ import { Eye, EyeOff } from 'lucide-react'
 
 const API = 'http://localhost:5000/api'
 
-// Eye button for password visibility
+
 function EyeButton({ show, onClick }) {
   return (
     <button
@@ -31,7 +31,7 @@ export default function CreateAccount() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // Send data to backend
+  
   async function sendToServer(path, body) {
     setError('')
     setLoading(true)
@@ -47,6 +47,7 @@ export default function CreateAccount() {
       const data = await res.json()
 
       if (!res.ok) throw new Error(data.message || 'Could not create account.')
+        sessionStorage.removeItem('player')
 
       navigate('/levels')
     } catch (err) {

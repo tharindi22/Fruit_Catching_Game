@@ -15,7 +15,7 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // Send data to backend
+  
   async function sendToServer(path, body) {
     setError('')
     setLoading(true)
@@ -31,6 +31,7 @@ export default function Login() {
       const data = await res.json()
 
       if (!res.ok) throw new Error(data.message || 'Login failed.')
+        sessionStorage.removeItem('player')
 
       navigate('/levels')
     } catch (err) {
@@ -44,7 +45,7 @@ export default function Login() {
     }
   }
 
-  // Email and password login
+ 
   function handleSubmit(e) {
     e.preventDefault()
 
@@ -59,7 +60,7 @@ export default function Login() {
     sendToServer('/login', { email, password, remember })
   }
 
-  // Google login
+  
   function handleGoogleSuccess(response) {
     sendToServer('/google-login', { credential: response.credential })
   }
