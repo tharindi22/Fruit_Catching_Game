@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import Pause from './Pause'
+import BananaPopup from './BananaPopup'
 import { LEVELS, getUnlocked, unlockLevel } from '../levels'
+import { loadSounds, playSound, isMuted, setMuted } from '../sounds'
+import { loadImages, drawIcon } from '../images'
 
+const BONUS_SECONDS = 15
 
 const FRUITS = [
-  { emoji: '🍌', points: 3 },
-  { emoji: '🍎', points: 2 },
-  { emoji: '🍉', points: 1 },
-  { emoji: '🍇', points: 1 },
-  { emoji: '🍊', points: 1 },
+  { icon: 'banana', points: 3 },
+  { icon: 'red-apple', points: 2 },
+  { icon: 'watermelon', points: 1 },
+  { icon: 'grapes', points: 1 },
+  { icon: 'tangerine', points: 1 },
 ]
-
 
 export default function Game() {
   const { level } = useParams()
@@ -22,7 +25,6 @@ export default function Game() {
   if (isGuest && levelNumber > 2) return <Navigate to="/guest-limit" replace />
   if (!isGuest && levelNumber > getUnlocked()) return <Navigate to="/levels" replace />
 
-  
   return <GameScreen key={levelNumber} levelNumber={levelNumber} isGuest={isGuest} />
 }
 
@@ -30,59 +32,104 @@ function GameScreen({ levelNumber, isGuest }) {
   const navigate = useNavigate()
   const level = LEVELS[levelNumber - 1]
   const canvasRef = useRef(null)
-  const pausedRef = useRef(false) 
-  const [paused, setPaused] = useState(false) 
+
+  const pausedRef = useRef(false)
+  const puzzleRef = useRef(false)
+  const overRef = useRef(false)
+  const scoreRef = useRef(0)
+  const timeRef = useRef(level.time)
+  const bonusRef = useRef(2)
+
+  const [paused, setPaused] = useState(false)
+  const [puzzleOpen, setPuzzleOpen] = useState(false)
   const [score, setScore] = useState(0)
   const [timeLeft, setTimeLeft] = useState(level.time)
-  const bonusLeft = 2 
+  const [bonusLeft, setBonusLeft] = useState(2)
+  const [soundOn, setSoundOn] = useState(!isMuted())
 
-  
   function togglePause() {
+    if (puzzleRef.current) return
     pausedRef.current = !pausedRef.current
     setPaused(pausedRef.current)
   }
 
+  function toggleSound() {
+    setMuted(soundOn)
+    setSoundOn(!soundOn)
+  }
+
+  function endGame(reason) {
+    if (overRef.current) return
+    overRef.current = true
+    if (reason === 'bomb') playSound('bomb')
+    navigate('/game-over', { state: { score: scoreRef.current, reason, level: levelNumber } })
+  }
+
+  function finishLevel() {
+    if (overRef.current) return
+    overRef.current = true
+    if (!isGuest) unlockLevel(levelNumber + 1)
+
+    if (isGuest && levelNumber >= 2) return navigate('/guest-limit')
+
+    const time = timeRef.current
+    const stars = time >= level.time / 2 ? 3 : time >= level.time / 4 ? 2 : 1
+    navigate('/level-complete', {
+      state: {
+        level: levelNumber,
+        score: scoreRef.current,
+        bonus: bonusRef.current,
+        timeLeft: time,
+        stars,
+      },
+    })
+  }
+
+  function timeIsUp() {
+    if (bonusRef.current > 0) {
+      puzzleRef.current = true
+      pausedRef.current = true
+      setPuzzleOpen(true)
+    } else {
+      endGame('time')
+    }
+  }
+
+  function puzzleSolved() {
+    bonusRef.current -= 1
+    setBonusLeft(bonusRef.current)
+    timeRef.current += BONUS_SECONDS
+    setTimeLeft(timeRef.current)
+    puzzleRef.current = false
+    pausedRef.current = false
+    setPuzzleOpen(false)
+  }
+
+  function puzzleFailed() {
+    endGame('wrong')
+  }
+
   useEffect(() => {
+    loadSounds() 
+    loadImages() 
+
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
 
     const basket = { x: canvas.width / 2, y: canvas.height - 50, speed: 8 }
     const keys = { left: false, right: false }
     let items = [] 
-    let total = 0
-    let time = level.time
     let lastSpawn = 0
-    let over = false
+    let stopped = false
     let frameId
 
-    function endGame(reason) {
-      if (over) return
-      over = true
-      navigate('/game-over', { state: { score: total, reason, level: levelNumber } })
-    }
-
-    
-    function finishLevel() {
-      if (over) return
-      over = true
-      if (!isGuest) unlockLevel(levelNumber + 1)
-      
-      if (isGuest && levelNumber >= 2) return navigate('/guest-limit')
-
-      const stars = time >= level.time / 2 ? 3 : time >= level.time / 4 ? 2 : 1
-      navigate('/level-complete', {
-        state: { level: levelNumber, score: total, bonus: bonusLeft, timeLeft: time, stars },
-      })
-    }
-
-    
     function handleMouseMove(e) {
       const rect = canvas.getBoundingClientRect()
       basket.x = (e.clientX - rect.left) * (canvas.width / rect.width)
     }
 
-    
     function handleKeyDown(e) {
+      if (puzzleRef.current) return 
       if (e.key === 'ArrowLeft') keys.left = true
       if (e.key === 'ArrowRight') keys.right = true
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') e.preventDefault()
@@ -93,22 +140,18 @@ function GameScreen({ levelNumber, isGuest }) {
       if (e.key === 'ArrowRight') keys.right = false
     }
 
-    
     function loop(now) {
-      if (over) return
+      if (stopped || overRef.current) return
 
-      
       if (pausedRef.current) {
         frameId = requestAnimationFrame(loop)
         return
       }
 
-      
       if (keys.left) basket.x -= basket.speed
       if (keys.right) basket.x += basket.speed
       basket.x = Math.max(40, Math.min(canvas.width - 40, basket.x))
 
-      
       if (now - lastSpawn > level.spawnEvery) {
         lastSpawn = now
         const fruit = FRUITS[Math.floor(Math.random() * FRUITS.length)]
@@ -117,13 +160,12 @@ function GameScreen({ levelNumber, isGuest }) {
           x: 30 + Math.random() * (canvas.width - 60),
           y: -30,
           speed: level.fallSpeed + Math.random() * 1.5,
-          emoji: isBomb ? '💣' : fruit.emoji,
+          icon: isBomb ? 'bomb' : fruit.icon,
           points: fruit.points,
           isBomb,
         })
       }
 
-      
       for (const item of items) {
         item.y += item.speed
         const caught =
@@ -132,32 +174,27 @@ function GameScreen({ levelNumber, isGuest }) {
           Math.abs(item.x - basket.x) < 45
         if (caught) {
           if (item.isBomb) return endGame('bomb') 
-          total += item.points // EVENT: fruit caught
-          setScore(total)
+          playSound('catch') 
+          scoreRef.current += item.points 
+          setScore(scoreRef.current)
           item.caught = true
-          if (total >= level.target) return finishLevel() 
+          if (scoreRef.current >= level.target) return finishLevel() 
         }
       }
       items = items.filter((i) => !i.caught && i.y < canvas.height + 30)
 
-      
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.font = '40px serif'
-      items.forEach((i) => ctx.fillText(i.emoji, i.x, i.y))
-      ctx.font = '60px serif'
-      ctx.fillText('🧺', basket.x, basket.y)
+      items.forEach((i) => drawIcon(ctx, i.icon, i.x, i.y, 44))
+      drawIcon(ctx, 'basket', basket.x, basket.y, 70)
 
       frameId = requestAnimationFrame(loop)
     }
 
-    
     const timer = setInterval(() => {
       if (pausedRef.current) return
-      time -= 1
-      setTimeLeft(time)
-      if (time <= 0) endGame('time') 
+      timeRef.current -= 1
+      setTimeLeft(timeRef.current)
+      if (timeRef.current <= 0) timeIsUp()
     }, 1000)
 
     canvas.addEventListener('mousemove', handleMouseMove)
@@ -165,16 +202,15 @@ function GameScreen({ levelNumber, isGuest }) {
     window.addEventListener('keyup', handleKeyUp)
     frameId = requestAnimationFrame(loop)
 
-    
     return () => {
-      over = true
+      stopped = true
       cancelAnimationFrame(frameId)
       clearInterval(timer)
       canvas.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [navigate, level, levelNumber, isGuest])
+  }, [])
 
   const pill =
     'rounded-full border border-yellow-400 px-4 py-1 text-sm text-yellow-400'
@@ -203,12 +239,16 @@ function GameScreen({ levelNumber, isGuest }) {
           className="w-full rounded-lg bg-black/40"
         />
 
-        <p className="mt-2 text-center text-xs text-gray-300">
-          Move with the mouse or the left and right arrow keys. Press Esc to pause.
-        </p>
+        <div className="mt-2 flex items-center justify-between text-xs text-gray-300">
+          <span>Move with the mouse or the arrow keys. Press Esc to pause.</span>
+          <button onClick={toggleSound} className="underline">
+            Sound: {soundOn ? 'On' : 'Off'}
+          </button>
+        </div>
       </div>
 
       {paused && <Pause onResume={togglePause} />}
+      {puzzleOpen && <BananaPopup onSolved={puzzleSolved} onFailed={puzzleFailed} />}
     </div>
   )
 }
