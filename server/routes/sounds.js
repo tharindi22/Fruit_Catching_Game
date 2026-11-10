@@ -4,12 +4,8 @@ const router = express.Router()
 
 
 const SEARCHES = {
-  fall: 'whoosh',       
-  catch: 'pop',         
-  bomb: 'explosion',    
-  bonus: 'coin',        
-  win: 'level complete',
-  over: 'game over',
+  catch: 'pop',
+  bomb: 'small explosion',
 }
 
 let cache = null 

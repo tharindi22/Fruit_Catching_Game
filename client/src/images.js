@@ -13,12 +13,17 @@ export function loadImages() {
   }
 }
 
-export function drawIcon(ctx, name, fallback, x, y, size) {
+export function drawIcon(ctx, name, x, y, size) {
   const img = images[name]
-  if (img && img.complete && img.naturalWidth > 0) {
+  if (!img || !img.complete) return
+
+  if (img.naturalWidth > 0) {
     ctx.drawImage(img, x - size / 2, y - size / 2, size, size)
   } else {
-    ctx.font = size + 'px serif'
-    ctx.fillText(fallback, x, y)
+
+    ctx.fillStyle = '#d1d5db'
+    ctx.beginPath()
+    ctx.arc(x, y, size / 2, 0, Math.PI * 2)
+    ctx.fill()
   }
 }

@@ -9,11 +9,11 @@ import { loadImages, drawIcon } from '../images'
 const BONUS_SECONDS = 15
 
 const FRUITS = [
-  { emoji: '🍌', icon: 'banana', points: 3 },
-  { emoji: '🍎', icon: 'red-apple', points: 2 },
-  { emoji: '🍉', icon: 'watermelon', points: 1 },
-  { emoji: '🍇', icon: 'grapes', points: 1 },
-  { emoji: '🍊', icon: 'tangerine', points: 1 },
+  { icon: 'banana', points: 3 },
+  { icon: 'red-apple', points: 2 },
+  { icon: 'watermelon', points: 1 },
+  { icon: 'grapes', points: 1 },
+  { icon: 'tangerine', points: 1 },
 ]
 
 export default function Game() {
@@ -110,15 +110,15 @@ function GameScreen({ levelNumber, isGuest }) {
   }
 
   useEffect(() => {
-    loadSounds()
-    loadImages()
+    loadSounds() 
+    loadImages() 
 
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
 
     const basket = { x: canvas.width / 2, y: canvas.height - 50, speed: 8 }
     const keys = { left: false, right: false }
-    let items = []
+    let items = [] 
     let lastSpawn = 0
     let stopped = false
     let frameId
@@ -129,7 +129,7 @@ function GameScreen({ levelNumber, isGuest }) {
     }
 
     function handleKeyDown(e) {
-      if (puzzleRef.current) return
+      if (puzzleRef.current) return 
       if (e.key === 'ArrowLeft') keys.left = true
       if (e.key === 'ArrowRight') keys.right = true
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') e.preventDefault()
@@ -160,7 +160,6 @@ function GameScreen({ levelNumber, isGuest }) {
           x: 30 + Math.random() * (canvas.width - 60),
           y: -30,
           speed: level.fallSpeed + Math.random() * 1.5,
-          emoji: isBomb ? '💣' : fruit.emoji,
           icon: isBomb ? 'bomb' : fruit.icon,
           points: fruit.points,
           isBomb,
@@ -179,16 +178,14 @@ function GameScreen({ levelNumber, isGuest }) {
           scoreRef.current += item.points 
           setScore(scoreRef.current)
           item.caught = true
-          if (scoreRef.current >= level.target) return finishLevel()
+          if (scoreRef.current >= level.target) return finishLevel() 
         }
       }
       items = items.filter((i) => !i.caught && i.y < canvas.height + 30)
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      items.forEach((i) => drawIcon(ctx, i.icon, i.emoji, i.x, i.y, 44))
-      drawIcon(ctx, 'basket', '🧺', basket.x, basket.y, 70)
+      items.forEach((i) => drawIcon(ctx, i.icon, i.x, i.y, 44))
+      drawIcon(ctx, 'basket', basket.x, basket.y, 70)
 
       frameId = requestAnimationFrame(loop)
     }
