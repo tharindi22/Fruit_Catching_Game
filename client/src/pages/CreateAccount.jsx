@@ -49,7 +49,7 @@ export default function CreateAccount() {
       if (!res.ok) throw new Error(data.message || 'Could not create account.')
         sessionStorage.removeItem('player')
 
-      navigate('/levels')
+      navigate('/ready-to-play')
     } catch (err) {
       setError(
         err.message === 'Failed to fetch'

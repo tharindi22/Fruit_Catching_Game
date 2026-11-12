@@ -5,6 +5,9 @@ import db from '../db.js'
 import { OAuth2Client } from 'google-auth-library'
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+googleClient.getFederatedSignonCertsAsync()
+  .catch((err) => console.error('Could not pre-load Google certs:', err.message))
+db.query('SELECT 1').catch((err) => console.error('DB warm-up failed:', err.message))
 
 const router = express.Router()
 

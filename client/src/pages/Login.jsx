@@ -33,7 +33,7 @@ export default function Login() {
       if (!res.ok) throw new Error(data.message || 'Login failed.')
         sessionStorage.removeItem('player')
 
-      navigate('/levels')
+      navigate('/ready-to-play')
     } catch (err) {
       setError(
         err.message === 'Failed to fetch'
@@ -140,6 +140,11 @@ export default function Login() {
             Forgot Password
           </Link>
         </div>
+
+         {/* Loading message */}
+        {loading && (
+          <p className="mb-3 text-center text-sm text-yellow-300">Signing</p>
+        )}
 
         {/* Error message */}
         {error && (
