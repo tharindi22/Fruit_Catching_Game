@@ -17,7 +17,6 @@ export default function LevelComplete() {
       <div className="w-full max-w-sm rounded-xl border border-yellow-400 bg-black/80 p-6 text-center text-white shadow-2xl backdrop-blur-sm">
         <h1 className="text-3xl font-bold text-yellow-400">Level {level} Complete!</h1>
 
-        {/* Stars */}
         <p className="my-4 text-4xl" aria-label={stars + ' stars'}>
           {[1, 2, 3].map((n) => (
             <span key={n} className={n <= stars ? 'text-yellow-400' : 'text-gray-600'}>

@@ -9,6 +9,8 @@ import LevelSelect from './pages/LevelSelect'
 import Game from './pages/Game'
 import LevelComplete from './pages/LevelComplete'
 import GameOver from './pages/GameOver'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 
 export default function App() {
   return (
@@ -24,7 +26,8 @@ export default function App() {
         <Route path="/game/:level" element={<Game />} />
         <Route path="/level-complete" element={<LevelComplete />} />
         <Route path="/game-over" element={<GameOver />} />
-        <Route path="/leaderboard" element={<p className="p-10 text-white">Leaderboard page</p>} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </BrowserRouter>
   )

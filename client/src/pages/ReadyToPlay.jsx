@@ -43,7 +43,6 @@ export default function ReadyToPlay() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-green-900 bg-[url('/bg.jpg')] bg-cover bg-center px-4 py-6">
       <div className="w-full max-w-sm rounded-xl border border-yellow-400 bg-black/80 p-6 text-center text-white shadow-2xl backdrop-blur-sm">
-        {/* Top row */}
         <div className="mb-4 flex items-center justify-between">
           <span className="rounded-full border border-yellow-400 px-4 py-1 text-sm text-yellow-400">
             Hi {name}

@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
@@ -85,7 +84,6 @@ export default function Login() {
           Welcome back! Log in to continue playing Fruit Catch.
         </p>
 
-        {/* Email */}
         <label htmlFor="email" className="mb-1 block text-md">
           Email
         </label>
@@ -99,7 +97,6 @@ export default function Login() {
           className="mb-3 w-full rounded-lg border border-white/80 bg-white/5 px-4 py-2 text-white text-sm placeholder-gray-300 outline-none focus:border-yellow-400"
         />
 
-        {/* Password */}
         <label htmlFor="password" className="mb-1 block text-md">
           Password
         </label>
@@ -114,7 +111,6 @@ export default function Login() {
             className="w-full rounded-lg border border-white/80 bg-white/5 px-4 py-2 pr-10 text-white text-sm placeholder-gray-300 outline-none focus:border-yellow-400"
           />
 
-          {/* Show / Hide Password */}
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
@@ -125,7 +121,6 @@ export default function Login() {
           </button>
         </div>
 
-        {/* Remember me and Forgot Password */}
         <div className="mb-4 flex items-center justify-between text-xs">
           <label className="flex items-center gap-2">
             <input
@@ -141,19 +136,16 @@ export default function Login() {
           </Link>
         </div>
 
-         {/* Loading message */}
         {loading && (
           <p className="mb-3 text-center text-sm text-yellow-300">Signing</p>
         )}
 
-        {/* Error message */}
         {error && (
           <p role="alert" className="mb-3 text-center text-sm text-red-300">
             {error}
           </p>
         )}
 
-        {/* Login button */}
         <button
           type="submit"
           disabled={loading}
@@ -162,14 +154,12 @@ export default function Login() {
           {loading ? 'Please wait...' : 'Login'}
         </button>
 
-        {/* Divider */}
         <div className="my-5 flex items-center gap-5">
           <div className="h-px flex-1 bg-white/30"></div>
           <span className="text-xs text-gray-300">or</span>
           <div className="h-px flex-1 bg-white/30"></div>
         </div>
 
-        {/* Google button */}
         <div className="flex justify-center">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}

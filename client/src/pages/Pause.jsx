@@ -17,7 +17,6 @@ export default function Pause({ onResume }) {
           Resume
         </button>
 
-        {/* Opens in a new tab so the paused game is not lost */}
         <a
           href="/how-to-play"
           target="_blank"

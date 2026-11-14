@@ -116,7 +116,6 @@ export default function CreateAccount() {
           className="mb-3 w-full rounded-lg border border-white/80 bg-white/5 px-4 py-2 text-white text-sm placeholder-gray-300 outline-none focus:border-yellow-400"
         />
 
-        {/* Email */}
         <label htmlFor="email" className="mb-1 block text-sm">
           Email
         </label>
@@ -131,7 +130,6 @@ export default function CreateAccount() {
           className="mb-3 w-full rounded-lg border border-white/80 bg-white/5 px-4 py-2 text-white text-sm placeholder-gray-300 outline-none focus:border-yellow-400"
         />
 
-        {/* Password */}
         <label htmlFor="password" className="mb-1 block text-sm">
           Password
         </label>
@@ -153,7 +151,6 @@ export default function CreateAccount() {
           />
         </div>
 
-        {/* Confirm Password */}
         <label htmlFor="confirmPassword" className="mb-1 block text-sm">
           Confirm Password
         </label>
@@ -175,7 +172,6 @@ export default function CreateAccount() {
           />
         </div>
 
-        {/* Error message */}
         {error && (
           <p className="mb-3 text-center text-sm text-red-400">
             {error}
@@ -190,14 +186,12 @@ export default function CreateAccount() {
           {loading ? 'Please wait...' : 'Create Account'}
         </button>
 
-        {/* Divider */}
         <div className="my-5 flex items-center gap-3">
           <div className="h-px flex-1 bg-white/30"></div>
           <span className="text-xs text-gray-300">or</span>
           <div className="h-px flex-1 bg-white/30"></div>
         </div>
 
-        {/* Google button */}
         <div className="flex justify-center">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}

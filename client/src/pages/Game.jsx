@@ -218,7 +218,7 @@ function GameScreen({ levelNumber, isGuest }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-green-900 bg-[url('/bg.jpg')] bg-cover bg-center px-4 py-4">
       <div className="w-full max-w-3xl rounded-xl border border-yellow-400 bg-black/80 p-4 shadow-2xl">
-        {/* Top bar */}
+
         <div className="mb-3 flex items-center justify-between gap-2">
           <span className={pill}>Level {levelNumber}</span>
           <span className={pill}>
@@ -231,7 +231,6 @@ function GameScreen({ levelNumber, isGuest }) {
           </button>
         </div>
 
-        {/* Game area */}
         <canvas
           ref={canvasRef}
           width={800}
