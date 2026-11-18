@@ -20,7 +20,7 @@ function setLoginCookie(res, user, remember) {
     { expiresIn: days + 'd' }
   )
   res.cookie('token', token, {
-    httpOnly: true, // JavaScript in the browser cannot read it
+    httpOnly: true, 
     sameSite: 'lax',
     maxAge: days * 24 * 60 * 60 * 1000,
   })
@@ -42,7 +42,7 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ message: 'This email is already registered.' })
     }
 
-    const passwordHash = await bcrypt.hash(password, 10) // never store the plain password
+    const passwordHash = await bcrypt.hash(password, 10) 
     const [result] = await db.query(
       'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)',
       [name, email, passwordHash]
