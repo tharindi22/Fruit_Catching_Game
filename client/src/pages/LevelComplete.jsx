@@ -4,10 +4,9 @@ import { LEVELS } from '../levels'
 export default function LevelComplete() {
   const { state } = useLocation()
 
-  
   if (!state) return <Navigate to="/ready-to-play" replace />
 
-  const { level, score, bonus, timeLeft, stars } = state
+  const { level, score, timeLeft, stars } = state
   const next = level < LEVELS.length ? level + 1 : null
 
   const pill = 'rounded-full border border-yellow-400 px-4 py-1 text-sm text-yellow-400'
@@ -27,7 +26,6 @@ export default function LevelComplete() {
 
         <div className="mb-6 flex justify-center gap-2">
           <span className={pill}>Score {score}</span>
-          <span className={pill}>Bonus {bonus}</span>
           <span className={pill}>Time {timeLeft}s</span>
         </div>
 

@@ -1,67 +1,63 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { GoogleLogin } from '@react-oauth/google'
-import { Eye, EyeOff } from 'lucide-react'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+import { Eye, EyeOff } from "lucide-react";
 
-const API = 'http://localhost:5000/api'
+const API = "http://localhost:5000/api";
 
 export default function Login() {
-  const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [remember, setRemember] = useState(false)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  
   async function sendToServer(path, body) {
-    setError('')
-    setLoading(true)
+    setError("");
+    setLoading(true);
 
     try {
       const res = await fetch(API + path, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(body),
-      })
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
-      if (!res.ok) throw new Error(data.message || 'Login failed.')
-        sessionStorage.removeItem('player')
+      if (!res.ok) throw new Error(data.message || "Login failed.");
+      sessionStorage.removeItem("player");
 
-      navigate('/ready-to-play')
+      navigate("/ready-to-play");
     } catch (err) {
       setError(
-        err.message === 'Failed to fetch'
-          ? 'Cannot reach the server. Please try again later.'
-          : err.message
-      )
+        err.message === "Failed to fetch"
+          ? "Cannot reach the server. Please try again later."
+          : err.message,
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
- 
   function handleSubmit(e) {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!email || !password) {
-      return setError('Please enter your email and password.')
+      return setError("Please enter your email and password.");
     }
 
     if (!/\S+@\S+\.\S+/.test(email)) {
-      return setError('Please enter a valid email address.')
+      return setError("Please enter a valid email address.");
     }
 
-    sendToServer('/login', { email, password, remember })
+    sendToServer("/login", { email, password });
   }
 
-  
   function handleGoogleSuccess(response) {
-    sendToServer('/google-login', { credential: response.credential })
+    sendToServer("/google-login", { credential: response.credential });
   }
 
   return (
@@ -104,7 +100,7 @@ export default function Login() {
         <div className="relative mb-3">
           <input
             id="password"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
@@ -114,30 +110,21 @@ export default function Login() {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            aria-label={showPassword ? "Hide password" : "Show password"}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white transition-colors"
           >
             {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
           </button>
         </div>
 
-        <div className="mb-4 flex items-center justify-between text-xs">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-            />
-            Remember me
-          </label>
-
+        <div className="mb-4 flex justify-end text-xs">
           <Link to="/forgot-password" className="underline">
             Forgot Password
           </Link>
         </div>
 
         {loading && (
-          <p className="mb-3 text-center text-sm text-yellow-300">Signing</p>
+          <p className="mb-3 text-center text-sm text-yellow-300">Signing in...</p>
         )}
 
         {error && (
@@ -151,7 +138,7 @@ export default function Login() {
           disabled={loading}
           className="w-full rounded-md bg-yellow-400 py-2 font-semibold text-black disabled:opacity-60"
         >
-          {loading ? 'Please wait...' : 'Login'}
+          {loading ? "Please wait..." : "Login"}
         </button>
 
         <div className="my-5 flex items-center gap-5">
@@ -163,7 +150,7 @@ export default function Login() {
         <div className="flex justify-center">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
-            onError={() => setError('Google login failed. Please try again.')}
+            onError={() => setError("Google login failed. Please try again.")}
             theme="filled_white"
             text="continue_with"
             width="336"
@@ -171,12 +158,12 @@ export default function Login() {
         </div>
 
         <p className="mt-4 text-center text-sm">
-          Not a player?{' '}
+          Not a player?{" "}
           <Link to="/create-account" className="text-yellow-400 underline">
             Create Account
           </Link>
         </p>
       </form>
     </div>
-  )
+  );
 }

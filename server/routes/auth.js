@@ -11,21 +11,20 @@ db.query('SELECT 1').catch((err) => console.error('DB warm-up failed:', err.mess
 
 const router = express.Router()
 
+const LOGIN_DAYS = 1
 
-function setLoginCookie(res, user, remember) {
-  const days = remember ? 7 : 1
+function setLoginCookie(res, user) {
   const token = jwt.sign(
     { id: user.id, name: user.name },
     process.env.JWT_SECRET,
-    { expiresIn: days + 'd' }
+    { expiresIn: LOGIN_DAYS + 'd' }
   )
   res.cookie('token', token, {
-    httpOnly: true, 
+    httpOnly: true,
     sameSite: 'lax',
-    maxAge: days * 24 * 60 * 60 * 1000,
+    maxAge: LOGIN_DAYS * 24 * 60 * 60 * 1000,
   })
 }
-
 
 router.post('/register', async (req, res) => {
   try {
@@ -48,7 +47,7 @@ router.post('/register', async (req, res) => {
       [name, email, passwordHash]
     )
 
-    setLoginCookie(res, { id: result.insertId, name }, false)
+    setLoginCookie(res, { id: result.insertId, name })
     res.status(201).json({ message: 'Account created.' })
   } catch (err) {
     console.error(err)
@@ -59,7 +58,7 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   try {
-    const { email, password, remember } = req.body
+    const { email, password} = req.body
     if (!email || !password) {
       return res.status(400).json({ message: 'Please enter your email and password.' })
     }
@@ -76,7 +75,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Wrong email or password.' })
     }
 
-    setLoginCookie(res, user, remember)
+    setLoginCookie(res, user)
     res.json({ message: 'Logged in.' })
   } catch (err) {
     console.error(err)
@@ -131,7 +130,7 @@ router.post('/google-login', async (req, res) => {
       user = { id: result.insertId, name }
     }
 
-    setLoginCookie(res, user, true)
+    setLoginCookie(res, user)
     res.json({ message: 'Logged in with Google.' })
   } catch (err) {
     console.error(err)

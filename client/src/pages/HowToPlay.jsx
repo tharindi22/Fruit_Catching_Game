@@ -12,7 +12,7 @@ export default function HowToPlay() {
           <li>Touch a 💣 and the game ends straight away.</li>
           <li>When the timer reaches 0, a Banana puzzle appears.</li>
           <li>Solve it to get +15 seconds. A wrong answer ends the game.</li>
-          <li>You can get a time bonus up to 2 times per game.</li>
+          <li>Reach the full score to go to the next level.</li>
         </ol>
 
         <Link
