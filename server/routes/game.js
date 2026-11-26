@@ -5,7 +5,7 @@ import { requireLogin } from '../middleware.js'
 const router = express.Router()
 
 const MAX_LEVEL = 5
-const GUEST_MAX_LEVEL = 2
+const GUEST_MAX_LEVEL = 2 
 
 async function getProgress(userId) {
   await db.query('INSERT IGNORE INTO progress (user_id) VALUES (?)', [userId])
@@ -52,7 +52,6 @@ router.post('/game/start', async (req, res) => {
     res.status(500).json({ message: 'Server error. Please try again.' })
   }
 })
-
 router.post('/game/finish', requireLogin, async (req, res) => {
   try {
     const level = Number(req.body.level)

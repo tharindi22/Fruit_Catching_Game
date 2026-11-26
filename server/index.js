@@ -2,30 +2,24 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import { readUser } from './middleware.js'
 import authRoutes from './routes/auth.js'
 import bananaRoutes from './routes/banana.js'
 import soundRoutes from './routes/sounds.js'
 import passwordRoutes from './routes/password.js'
-import { readUser } from './middleware.js'
 import gameRoutes from './routes/game.js'
 
 const app = express()
 
-app.use(cors({ 
-  origin: process.env.CLIENT_URL, credentials: true 
-}))
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
 app.use(express.json())
-app.use(cookieParser())
-app.use('/api', authRoutes)
-app.use('/api', bananaRoutes)
-app.use('/api', soundRoutes)
-app.use('/api', passwordRoutes)
 app.use(cookieParser())
 app.use(readUser)
 
 app.use('/api', authRoutes)
 app.use('/api', bananaRoutes)
-app.use('/api', fruitRoutes)
+app.use('/api', soundRoutes)
+app.use('/api', passwordRoutes)
 app.use('/api', gameRoutes)
 
 app.listen(process.env.PORT, () => {

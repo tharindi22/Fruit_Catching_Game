@@ -1,8 +1,24 @@
-import { Link } from 'react-router-dom'
-import { LEVELS, getUnlocked } from '../levels'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { LEVELS } from '../levels'
+
+const API = 'http://localhost:5000/api'
 
 export default function LevelSelect() {
-  const current = getUnlocked() 
+  const navigate = useNavigate()
+  const [current, setCurrent] = useState(null) 
+
+  useEffect(() => {
+    fetch(API + '/progress', { credentials: 'include' })
+      .then((res) => {
+        if (!res.ok) throw new Error('Not logged in')
+        return res.json()
+      })
+      .then((data) => setCurrent(data.unlockedLevel))
+      .catch(() => navigate('/'))
+  }, [navigate])
+
+  if (!current) return null
 
   const tile = 'flex h-24 w-20 flex-col items-center justify-center rounded-lg border text-sm'
 
@@ -18,7 +34,6 @@ export default function LevelSelect() {
           {LEVELS.map((_, i) => {
             const n = i + 1
 
-            
             if (n > current) {
               return (
                 <div key={n} className={tile + ' border-white/80 text-gray-200'}>
