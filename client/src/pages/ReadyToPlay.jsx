@@ -1,45 +1,47 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-const API = 'http://localhost:5000/api'
+const API = "http://localhost:5000/api";
 
 export default function ReadyToPlay() {
-  const navigate = useNavigate()
-  const [name, setName] = useState('')
-  const bestScore = Number(localStorage.getItem('bestScore')) || 0 
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [bestScore, setBestScore] = useState(
+    Number(localStorage.getItem("bestScore")) || 0,
+  );
 
-  
   useEffect(() => {
     async function checkPlayer() {
       try {
-        const res = await fetch(API + '/me', { credentials: 'include' })
+        const res = await fetch(API + "/me", { credentials: "include" });
         if (res.ok) {
-          const data = await res.json()
-          return setName(data.name.split(' ')[0])
+          const data = await res.json();
+          setName(data.name.split(" ")[0]);
+          const progress = await fetch(API + "/progress", {
+            credentials: "include",
+          });
+          if (progress.ok) setBestScore((await progress.json()).bestScore);
+          return;
         }
-      } catch {
-        
-      }
-      if (sessionStorage.getItem('player') === 'guest') {
-        setName('Guest')
+      } catch {}
+      if (sessionStorage.getItem("player") === "guest") {
+        setName("Guest");
       } else {
-        navigate('/')
+        navigate("/");
       }
     }
-    checkPlayer()
-  }, [navigate])
+    checkPlayer();
+  }, [navigate]);
 
   async function handleLogout() {
     try {
-      await fetch(API + '/logout', { method: 'POST', credentials: 'include' })
-    } catch {
-     
-    }
-    sessionStorage.removeItem('player')
-    navigate('/')
+      await fetch(API + "/logout", { method: "POST", credentials: "include" });
+    } catch {}
+    sessionStorage.removeItem("player");
+    navigate("/");
   }
 
-  if (!name) return null 
+  if (!name) return null;
   return (
     <div className="flex min-h-screen items-center justify-center bg-green-900 bg-[url('/bg.jpg')] bg-cover bg-center px-4 py-6">
       <div className="w-full max-w-sm rounded-xl border border-yellow-400 bg-black/80 p-6 text-center text-white shadow-2xl backdrop-blur-sm">
@@ -58,7 +60,7 @@ export default function ReadyToPlay() {
         <img
           src="/fruits.png"
           alt=""
-          onError={(e) => (e.target.style.display = 'none')}
+          onError={(e) => (e.target.style.display = "none")}
           className="mx-auto mb-4 h-40 object-contain"
         />
 
@@ -68,7 +70,7 @@ export default function ReadyToPlay() {
         </p>
 
         <Link
-          to={name === 'Guest' ? '/game/1' : '/levels'}
+          to={name === "Guest" ? "/game/1" : "/levels"}
           className="mb-3 block w-full rounded-lg bg-yellow-400 py-2 text-lg font-semibold text-black hover:bg-yellow-300"
         >
           Play Game
@@ -87,5 +89,5 @@ export default function ReadyToPlay() {
         </Link>
       </div>
     </div>
-  )
+  );
 }

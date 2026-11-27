@@ -1,10 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
-
 
 const messages = {
   bomb: 'You caught a bomb 💣',
-  time: 'Time is up ⏰',
   wrong: 'Wrong answer 🍌',
 }
 
@@ -12,15 +10,22 @@ export default function GameOver() {
   const { state } = useLocation()
   const score = state?.score ?? 0
 
-  
-  const [best] = useState(() => {
+  const [best, setBest] = useState(() => {
     const old = Number(localStorage.getItem('bestScore')) || 0
     const newBest = Math.max(old, score)
     localStorage.setItem('bestScore', newBest)
     return newBest
   })
 
-  
+  useEffect(() => {
+    fetch('http://localhost:5000/api/progress', {
+      credentials: 'include',
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => data && setBest(data.bestScore))
+      .catch(() => {})
+  }, [])
+
   if (!state) return <Navigate to="/ready-to-play" replace />
 
   return (
@@ -42,12 +47,14 @@ export default function GameOver() {
         >
           Play Again
         </Link>
+
         <Link
           to="/leaderboard"
           className="mb-3 block w-full rounded-lg border border-yellow-400 py-2 text-yellow-400 hover:bg-yellow-400/10"
         >
           Leaderboard
         </Link>
+
         <Link
           to="/ready-to-play"
           className="block w-full rounded-lg border border-yellow-400 py-2 text-yellow-400 hover:bg-yellow-400/10"
